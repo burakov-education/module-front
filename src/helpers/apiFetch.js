@@ -3,7 +3,6 @@ export default async function (method, path, body = null, token = null) {
 
     const headers = {
         Accept: 'application/json',
-        'Content-Type': 'application/json',
         Client: 'my-login',
     }
 
@@ -17,10 +16,19 @@ export default async function (method, path, body = null, token = null) {
     }
 
     if (body) {
-        options.body = JSON.stringify(body)
+        if (body instanceof FormData) {
+            options.body = body
+        } else {
+            options.body = JSON.stringify(body)
+            options.headers['Content-Type'] = 'application/json'
+        }
     }
 
     const request = await fetch(url, options)
 
-    return await request.json()
+    try {
+        return await request.json()
+    } catch (e) {
+        return null
+    }
 }

@@ -1,10 +1,11 @@
 <script setup>
-import {inject, ref} from "vue";
+import {inject, onMounted, ref} from "vue";
 import InvalidFeedback from "@/components/InvalidFeedback.vue";
 import apiFetch from "@/helpers/apiFetch.js";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 
 const router = useRouter()
+const route = useRoute()
 const token = inject('token')
 const form = ref({
   data: {
@@ -25,6 +26,12 @@ const form = ref({
   errors: {},
   isSending: false,
 });
+
+onMounted(async () => {
+  const result = await apiFetch('get', `/products/${route.params.product_id}`)
+
+  form.value.data = result.data
+})
 
 const setImage = event => {
   form.value.data.image = event.target.files[0]
@@ -47,7 +54,9 @@ const sendForm = async () => {
   formData.append('title', form.value.data.title)
   formData.append('description', form.value.data.description)
   formData.append('price', form.value.data.price)
-  formData.append('image', form.value.data.image)
+  if (form.value.data.image) {
+    formData.append('image', form.value.data.image)
+  }
 
   for (const key in form.value.data.characteristics) {
     formData.append(`characteristics[${key}][title]`, form.value.data.characteristics[key].title)
@@ -62,9 +71,12 @@ const sendForm = async () => {
     }
   }
 
-  const result = await apiFetch('post', '/products', formData, token.value)
+  // important
+  formData.append('_method', 'patch')
 
-  if (result.errors) {
+  const result = await apiFetch('post', `/products/${route.params.product_id}`, formData, token.value)
+
+  if (result?.errors) {
     form.value.errors = result.errors
   } else {
     await router.push('/my')
@@ -74,6 +86,10 @@ const sendForm = async () => {
 }
 
 const addCharacteristic = () => {
+  if (!form.value.data.characteristics) {
+    form.value.data.characteristics = []
+  }
+
   form.value.data.characteristics.push({
     title: '',
     type: 'checkbox',
@@ -99,7 +115,7 @@ const deleteCharacteristic = (index) => {
 
 <template>
   <div class="container mt-5" style="max-width: 700px;">
-    <h2 class="mb-4">Создать объявление</h2>
+    <h2 class="mb-4">Редактировать объявление</h2>
     <form @submit.prevent="sendForm()" novalidate>
       <div class="mb-3">
         <label>Название</label>
@@ -127,6 +143,9 @@ const deleteCharacteristic = (index) => {
       </div>
       <div class="mb-3">
         <label>Изображение</label>
+        <template v-if="form.data.image_url">
+          <img :src="form.data.image_url" style="width: 400px;display:block;" alt="">
+        </template>
         <input type="file" class="form-control"
                :class="{'is-invalid': form.errors?.image}"
                @change="setImage"
@@ -189,7 +208,7 @@ const deleteCharacteristic = (index) => {
 
       <button type="button" class="btn btn-primary" @click.prevent="addCharacteristic()">Добавить характеристику</button>
       <hr>
-      <button type="submit" class="btn btn-success" :disabled="form.isSending">Опубликовать</button>
+      <button type="submit" class="btn btn-success" :disabled="form.isSending">Сохранить</button>
     </form>
   </div>
 </template>

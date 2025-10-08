@@ -1,15 +1,20 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import {RouterLink, RouterView, useRouter} from 'vue-router'
 import {provide, ref} from "vue";
 
 const token = ref(null)
+const router = useRouter()
 
 const updateToken = (newToken) => {
   localStorage.setItem('token', newToken)
   token.value = newToken
 }
 
-const logout = () => updateToken('')
+const logout = async () => {
+  updateToken('')
+
+  await router.push('/')
+}
 
 updateToken(localStorage.getItem('token'))
 
