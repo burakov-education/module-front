@@ -1,6 +1,7 @@
 <script setup>
 import {inject, onMounted, ref} from "vue";
 import apiFetch from "@/helpers/apiFetch.js";
+import ProductCard from "@/components/ProductCard.vue";
 
 const token = inject('token')
 const products = ref([])
@@ -35,20 +36,12 @@ const productForDelete = ref(false)
 
     <div class="row g-3" v-if="isLoaded">
 
-      <div class="col-md-6" v-for="product in products">
-        <div class="card h-100">
-          <img :src="product.image_url" class="card-img-top" alt="">
-          <div class="card-body">
-            <h5 class="card-title">{{ product.title }}</h5>
-            <p class="card-text">{{ product.description }}</p>
-            <p class="fw-bold">Цена: {{ product.price }} ₽</p>
-            <div class="d-flex justify-content-between">
-              <RouterLink :to="`/edit/${product.id}`" class="btn btn-outline-primary btn-sm">Редактировать</RouterLink>
-              <button @click.prevent="productForDelete = product" class="btn btn-outline-danger btn-sm">Удалить</button>
-            </div>
-          </div>
+      <ProductCard v-for="product in products" :product="product">
+        <div class="d-flex justify-content-between">
+          <RouterLink :to="`/edit/${product.id}`" class="btn btn-outline-primary btn-sm">Редактировать</RouterLink>
+          <button @click.prevent="productForDelete = product" class="btn btn-outline-danger btn-sm">Удалить</button>
         </div>
-      </div>
+      </ProductCard>
 
     </div>
 

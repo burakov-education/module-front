@@ -200,7 +200,6 @@ const deleteCharacteristic = (index) => {
         <div class="col-lg-1">
           <br>
           <a href="#" class="btn btn-sm btn-danger"
-             v-if="form.data.characteristics.length > 1"
              @click.prevent="deleteCharacteristic(chIndex)"
           >X</a>
         </div>
