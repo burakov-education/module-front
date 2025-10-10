@@ -11,6 +11,21 @@ const sort = ref({
   column: 'date',
   type: 'desc',
 })
+const notifyProductTitle = ref(null)
+
+onMounted(() => {
+  const ws = new WebSocket('ws://172.16.0.1:8080/?client=my-login')
+
+  ws.onmessage = (e) => {
+    const product = JSON.parse(e.data)
+
+    notifyProductTitle.value = product.title;
+
+    setTimeout(() => {
+      notifyProductTitle.value = null
+    }, 4000)
+  }
+})
 
 const clearFilters = () => {
   isFilterTouched.value = false
@@ -160,6 +175,10 @@ const sortedProducts = computed(() => {
 </script>
 
 <template>
+  <div class="notify" v-if="notifyProductTitle">
+    Новое объявление "{{ notifyProductTitle }}"
+  </div>
+
   <div class="container mt-4" v-if="isLoaded">
     <h1 class="mb-4">Список объявлений</h1>
 
@@ -237,3 +256,16 @@ const sortedProducts = computed(() => {
     </div>
   </div>
 </template>
+
+<style>
+.notify {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  border-radius: 10px;
+  background-color: white;
+  z-index: 9999;
+  padding: 10px 15px;
+  box-shadow: 0 0 20px 2px #000;
+}
+</style>

@@ -1,5 +1,5 @@
 export default async function (method, path, body = null, token = null) {
-    const url = `http://localhost/api-shop/public/api${path}`;
+    const url = `http://uxxuvtn-m1.wsr.lan/public/api${path}`;
 
     const headers = {
         Accept: 'application/json',
